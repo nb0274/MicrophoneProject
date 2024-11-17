@@ -47,10 +47,4 @@ public class RecordsList extends AppCompatActivity implements AdapterView.OnItem
         tV.setText(""+position);
     }
 
-    /**
-     * back method: Return to the listview demo activity
-     */
-    public void back(View view) {
-        finish();
-    }
 }
