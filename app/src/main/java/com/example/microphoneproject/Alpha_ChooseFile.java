@@ -5,6 +5,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -23,6 +24,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -77,37 +80,53 @@ public class Alpha_ChooseFile extends AppCompatActivity {
             StorageReference fileRef = storageReference.child("audio_files/" + file.getName());
 
             UploadTask uploadTask = fileRef.putStream(inputStream);
-            uploadTask.addOnSuccessListener(taskSnapshot -> {
-                // file uploaded successfully
-                Toast.makeText(Alpha_ChooseFile.this, "file uploaded successfully", Toast.LENGTH_SHORT).show();
-                // plays the file
-                playAudioFromFirebase(fileRef);
-            }).addOnFailureListener(e -> {
-                // file couldnt upload
-                Toast.makeText(Alpha_ChooseFile.this, "file couldnt upload", Toast.LENGTH_SHORT).show();
-                Log.e("UploadError", e.getMessage(), e);
+
+            // Using anonymous inner classes for listeners
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // file uploaded successfully
+                    Toast.makeText(Alpha_ChooseFile.this, "file uploaded successfully", Toast.LENGTH_SHORT).show();
+                    // plays the file
+                    playAudioFromFirebase(fileRef);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // file couldn't upload
+                    Toast.makeText(Alpha_ChooseFile.this, "file couldnt upload", Toast.LENGTH_SHORT).show();
+                    Log.e("UploadError", e.getMessage(), e);
+                }
             });
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+
     // plays from storage
     private void playAudioFromFirebase(StorageReference fileRef) {
-        fileRef.getDownloadUrl().addOnSuccessListener(uri -> {
-            // plays audio
-            MediaPlayer mediaPlayer = new MediaPlayer();
-            try {
-                mediaPlayer.setDataSource(uri.toString());
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
+        fileRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                // plays audio
+                MediaPlayer mediaPlayer = new MediaPlayer();
+                try {
+                    mediaPlayer.setDataSource(uri.toString());
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(Alpha_ChooseFile.this, "couldnt download file", Toast.LENGTH_SHORT).show();
-            Log.e("DownloadError", e.getMessage(), e);
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(Alpha_ChooseFile.this, "couldn't download file", Toast.LENGTH_SHORT).show();
+                Log.e("DownloadError", e.getMessage(), e);
+            }
         });
     }
+
 
 }
