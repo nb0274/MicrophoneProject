@@ -17,6 +17,9 @@
         android:theme="@style/Theme.AppCompat.DayNight.DarkActionBar"
         tools:targetApi="31">
         <activity
+            android:name=".Alpha_StorageImport"
+            android:exported="false" />
+        <activity
             android:name=".Alpha_BtnRecord"
             android:exported="false" />
         <activity
