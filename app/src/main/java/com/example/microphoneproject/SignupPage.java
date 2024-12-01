@@ -4,7 +4,10 @@ import static com.example.microphoneproject.FBRef.refAuth;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -97,5 +100,41 @@ public class SignupPage extends AppCompatActivity {
 
     public void loginUser(View view) {
         finish();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menuLogIn) {
+            startActivity(new Intent(SignupPage.this, MainActivity.class));
+            return true;
+        } else if (id == R.id.menuSignUp) {
+            // Already in Log In activity; no need for action here
+            return true;
+        } else if (id == R.id.menuRecordPage) {
+            startActivity(new Intent(SignupPage.this, RecordPage.class));
+            return true;
+        } else if (id == R.id.menuRecordList) {
+            startActivity(new Intent(SignupPage.this, RecordsList.class));
+            return true;
+        } else if (id == R.id.menuAlphaBtnRecord) {
+            startActivity(new Intent(SignupPage.this, Alpha_BtnRecord.class));
+            return true;
+        } else if (id == R.id.menuAlphaChooseFile) {
+            startActivity(new Intent(SignupPage.this, Alpha_ChooseFile.class));
+            return true;
+        } else if (id == R.id.menuStorageImport) {
+            startActivity(new Intent(SignupPage.this, Alpha_StorageImport.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }

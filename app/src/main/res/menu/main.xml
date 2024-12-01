@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menuLogIn"
+        android:title="Log In"
+        android:orderInCategory="100"/>
+
+    <item
+        android:id="@+id/menuSignUp"
+        android:title="Sign Up"
+        android:orderInCategory="200"/>
+
+    <item
+        android:id="@+id/menuRecordPage"
+        android:title="Record Page"
+        android:orderInCategory="300"/>
+
+    <item
+        android:id="@+id/menuRecordList"
+        android:title="Record List"
+        android:orderInCategory="400"/>
+
+    <item
+        android:id="@+id/menuAlphaBtnRecord"
+        android:title="Alpha Btn Record"
+        android:orderInCategory="510"/>
+
+    <item
+        android:id="@+id/menuAlphaChooseFile"
+        android:title="Alpha Choose File"
+        android:orderInCategory="520"/>
+
+    <item
+        android:id="@+id/menuStorageImport"
+        android:title="Alpha Storage Import"
+        android:orderInCategory="530"/>
+
+</menu>

@@ -5,6 +5,8 @@ import static com.example.microphoneproject.FBRef.refAuth;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         etEmail = findViewById(R.id.editTextUserEmail);
         etPassword = findViewById(R.id.editTextUserPassword);
     }
@@ -79,5 +82,41 @@ public class MainActivity extends AppCompatActivity {
     public void createUser(View view) {
         si = new Intent(this, SignupPage.class);
         startActivity(si);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menuLogIn) {
+            // Already in Log In activity; no need for action here
+            return true;
+        } else if (id == R.id.menuSignUp) {
+            startActivity(new Intent(MainActivity.this, SignupPage.class));
+            return true;
+        } else if (id == R.id.menuRecordPage) {
+            startActivity(new Intent(MainActivity.this, RecordPage.class));
+            return true;
+        } else if (id == R.id.menuRecordList) {
+            startActivity(new Intent(MainActivity.this, RecordsList.class));
+            return true;
+        } else if (id == R.id.menuAlphaBtnRecord) {
+            startActivity(new Intent(MainActivity.this, Alpha_BtnRecord.class));
+            return true;
+        } else if (id == R.id.menuAlphaChooseFile) {
+            startActivity(new Intent(MainActivity.this, Alpha_ChooseFile.class));
+            return true;
+        } else if (id == R.id.menuStorageImport) {
+            startActivity(new Intent(MainActivity.this, Alpha_StorageImport.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
