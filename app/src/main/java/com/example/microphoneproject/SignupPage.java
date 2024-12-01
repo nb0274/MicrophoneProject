@@ -18,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -25,7 +26,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
-
 public class SignupPage extends AppCompatActivity {
     Context context;
     EditText etEmail;
@@ -47,6 +47,7 @@ public class SignupPage extends AppCompatActivity {
         etUsername = findViewById(R.id.editTextUserName);
         etPassword = findViewById(R.id.editTextUserPassword);
         context = this;
+        FirebaseApp.initializeApp(context);
     }
 
 
