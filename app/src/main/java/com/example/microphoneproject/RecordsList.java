@@ -1,6 +1,9 @@
 package com.example.microphoneproject;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -45,6 +48,42 @@ public class RecordsList extends AppCompatActivity implements AdapterView.OnItem
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         tV.setText(""+position);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menuLogIn) {
+            startActivity(new Intent(RecordsList.this, MainActivity.class));
+            return true;
+        } else if (id == R.id.menuSignUp) {
+            startActivity(new Intent(RecordsList.this, SignupPage.class));
+            return true;
+        } else if (id == R.id.menuRecordPage) {
+            startActivity(new Intent(RecordsList.this, RecordPage.class));
+            return true;
+        } else if (id == R.id.menuRecordList) {
+            // Already in Records List activity; no need for action here
+            return true;
+        } else if (id == R.id.menuAlphaBtnRecord) {
+            startActivity(new Intent(RecordsList.this, Alpha_BtnRecord.class));
+            return true;
+        } else if (id == R.id.menuAlphaChooseFile) {
+            startActivity(new Intent(RecordsList.this, Alpha_ChooseFile.class));
+            return true;
+        } else if (id == R.id.menuStorageImport) {
+            startActivity(new Intent(RecordsList.this, Alpha_StorageImport.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
 }

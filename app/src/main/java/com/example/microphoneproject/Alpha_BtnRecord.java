@@ -1,5 +1,6 @@
 package com.example.microphoneproject;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -14,6 +15,8 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -140,5 +143,41 @@ public class Alpha_BtnRecord extends AppCompatActivity {
                         Log.e("AudioRecorder", "Upload failed", e);
                     }
                 });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menuLogIn) {
+            startActivity(new Intent(Alpha_BtnRecord.this, MainActivity.class));
+            return true;
+        } else if (id == R.id.menuSignUp) {
+            startActivity(new Intent(Alpha_BtnRecord.this, SignupPage.class));
+            return true;
+        } else if (id == R.id.menuRecordPage) {
+            startActivity(new Intent(Alpha_BtnRecord.this, RecordPage.class));
+            return true;
+        } else if (id == R.id.menuRecordList) {
+            startActivity(new Intent(Alpha_BtnRecord.this, RecordsList.class));
+            return true;
+        } else if (id == R.id.menuAlphaBtnRecord) {
+            // Already in Button Record activity; no need for action here
+            return true;
+        } else if (id == R.id.menuAlphaChooseFile) {
+            startActivity(new Intent(Alpha_BtnRecord.this, Alpha_ChooseFile.class));
+            return true;
+        } else if (id == R.id.menuStorageImport) {
+            startActivity(new Intent(Alpha_BtnRecord.this, Alpha_StorageImport.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }

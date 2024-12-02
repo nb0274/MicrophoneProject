@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -128,5 +130,40 @@ public class Alpha_ChooseFile extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.menuLogIn) {
+            startActivity(new Intent(Alpha_ChooseFile.this, MainActivity.class));
+            return true;
+        } else if (id == R.id.menuSignUp) {
+            startActivity(new Intent(Alpha_ChooseFile.this, SignupPage.class));
+            return true;
+        } else if (id == R.id.menuRecordPage) {
+            startActivity(new Intent(Alpha_ChooseFile.this, RecordPage.class));
+            return true;
+        } else if (id == R.id.menuRecordList) {
+            startActivity(new Intent(Alpha_ChooseFile.this, RecordsList.class));
+            return true;
+        } else if (id == R.id.menuAlphaBtnRecord) {
+            startActivity(new Intent(Alpha_ChooseFile.this, Alpha_BtnRecord.class));
+            return true;
+        } else if (id == R.id.menuAlphaChooseFile) {
+            // Already in Choose File activity; no need for action here
+            return true;
+        } else if (id == R.id.menuStorageImport) {
+            startActivity(new Intent(Alpha_ChooseFile.this, Alpha_StorageImport.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
 
 }

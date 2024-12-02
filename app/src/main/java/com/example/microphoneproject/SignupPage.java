@@ -116,7 +116,7 @@ public class SignupPage extends AppCompatActivity {
             startActivity(new Intent(SignupPage.this, MainActivity.class));
             return true;
         } else if (id == R.id.menuSignUp) {
-            // Already in Log In activity; no need for action here
+            // Already in Sign Up activity; no need for action here
             return true;
         } else if (id == R.id.menuRecordPage) {
             startActivity(new Intent(SignupPage.this, RecordPage.class));
