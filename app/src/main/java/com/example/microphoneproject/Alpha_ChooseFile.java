@@ -13,6 +13,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import android.Manifest;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -41,11 +42,13 @@ public class Alpha_ChooseFile extends AppCompatActivity {
     private static final int PICK_AUDIO_FILE = 1; // audio pick code
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
+    private static final int REQUEST_STORAGE_PERMISSION_CODE = 200;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alpha_choose_file);
+        checkPermissions();
 
 
         // Firebase Storage
@@ -79,9 +82,9 @@ public class Alpha_ChooseFile extends AppCompatActivity {
         try {
             InputStream inputStream = getContentResolver().openInputStream(fileUri);
             File file = new File(fileUri.getPath());
-            StorageReference fileRef = storageReference.child("audio_files/" + file.getName());
+            StorageReference storageRef = storageReference.child("audio_files/" + file.getName());
 
-            UploadTask uploadTask = fileRef.putStream(inputStream);
+            UploadTask uploadTask = storageRef.putStream(inputStream);
 
             // Using anonymous inner classes for listeners
             uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -90,7 +93,7 @@ public class Alpha_ChooseFile extends AppCompatActivity {
                     // file uploaded successfully
                     Toast.makeText(Alpha_ChooseFile.this, "file uploaded successfully", Toast.LENGTH_SHORT).show();
                     // plays the file
-                    playAudioFromFirebase(fileRef);
+                    playAudioFromFirebase(storageRef);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -129,6 +132,29 @@ public class Alpha_ChooseFile extends AppCompatActivity {
             }
         });
     }
+
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_PERMISSION_CODE
+            );
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
