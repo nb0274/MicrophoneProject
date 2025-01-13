@@ -5,6 +5,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -39,6 +41,8 @@ import java.io.InputStream;
 
 public class Alpha_ChooseFile extends AppCompatActivity {
 
+    private ActivityResultLauncher<String> filePickerLauncher;
+
     private static final int PICK_AUDIO_FILE = 1; // audio pick code
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
@@ -55,27 +59,40 @@ public class Alpha_ChooseFile extends AppCompatActivity {
         firebaseStorage = FirebaseStorage.getInstance();
         storageReference = firebaseStorage.getReference();
 
+        // Initialize the ActivityResultLauncher
+        filePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.GetContent(),
+                result -> {
+                    if (result != null) {
+                        // Process the selected file
+                        uploadFileToFirebase(result);
+                    }
+                }
+        );
+
     }
 
     // opens file explorer
     public void openFilePicker(View view) {
-        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
-        intent.setType("audio/*");
-        startActivityForResult(intent, PICK_AUDIO_FILE);
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+//        intent.setType("audio/*");
+//        startActivityForResult(intent, PICK_AUDIO_FILE);
+
+        filePickerLauncher.launch("audio/*");
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_AUDIO_FILE && resultCode == RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            if (fileUri != null) {
-                // uploads file to storage
-                uploadFileToFirebase(fileUri);
-            }
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (requestCode == PICK_AUDIO_FILE && resultCode == RESULT_OK && data != null) {
+//            Uri fileUri = data.getData();
+//            if (fileUri != null) {
+//                // uploads file to storage
+//                uploadFileToFirebase(fileUri);
+//            }
+//        }
+//    }
 
     // upload to Firebase Storage
     private void uploadFileToFirebase(Uri fileUri) {

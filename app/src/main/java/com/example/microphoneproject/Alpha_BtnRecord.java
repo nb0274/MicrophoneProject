@@ -1,5 +1,7 @@
 package com.example.microphoneproject;
 
+import static com.example.microphoneproject.FBRef.refAuth;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -35,6 +37,8 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.IOException;
 
+import Objects.User;
+
 public class Alpha_BtnRecord extends AppCompatActivity {
 
     private Button recordButton, uploadButton;
@@ -42,6 +46,7 @@ public class Alpha_BtnRecord extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private boolean isRecording = false;
     private String audioFilePath;
+    private User user;
 
     private static final int REQUEST_RECORD_PERMISSION_CODE = 100;
 
@@ -66,8 +71,10 @@ public class Alpha_BtnRecord extends AppCompatActivity {
                     startRecording();
                 }
             }
+            ;
         });
 
+        user.setUID(refAuth.getCurrentUser().getUid());
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

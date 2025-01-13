@@ -96,6 +96,7 @@ public class SignupPage extends AppCompatActivity {
                 }
             });
         }
+
     }
 
     public void loginUser(View view) {
