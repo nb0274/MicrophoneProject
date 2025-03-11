@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 
 import Objects.User;
 
@@ -76,17 +77,32 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
                             FirebaseUser firebaseUser = refAuth.getCurrentUser();
-                            if (firebaseUser != null) {
-                                User user = User.getInstance();
-                                user.setUID(firebaseUser.getUid());
-                                user.setUsername(firebaseUser.getDisplayName()); // Make sure username is set in Firebase Auth
+                            String uid = firebaseUser.getUid();
 
-                                Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(MainActivity.this, RecordPage.class)); // Navigate to main screen
-                                finish();
-                            }
+                            // Fetch user data from DB
+                            FBRef.refUsers.child(uid).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DataSnapshot> dbTask) {
+                                    if (dbTask.isSuccessful()) {
+                                        if (dbTask.getResult().exists()) {
+                                            User user = User.getInstance();
+                                            user.setUID(uid);
+                                            user.setUsername(dbTask.getResult().child("username").getValue(String.class));
+
+                                            Toast.makeText(MainActivity.this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
+
+                                            // Go to main app page
+                                            startActivity(new Intent(MainActivity.this, RecordPage.class));
+                                            finish();
+                                        } else {
+                                            Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_LONG).show();
+                                        }
+                                    } else {
+                                        Toast.makeText(MainActivity.this, "Failed to retrieve user data", Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
                         }
                         else {
                             // If sign in fails, display a message to the user.

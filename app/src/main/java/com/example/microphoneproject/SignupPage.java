@@ -79,25 +79,32 @@ public class SignupPage extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             pd.dismiss();
 
-                            if (task.isSuccessful()) {
+                            if(task.isSuccessful()) {
                                 FirebaseUser firebaseUser = refAuth.getCurrentUser();
-                                if (firebaseUser != null) {
-                                    User user = User.getInstance();
-                                    user.setUID(firebaseUser.getUid());
-                                    user.setUsername(username);
+                                String uid = firebaseUser.getUid(); // Get the UID of the newly created user
 
-                                    // Optionally update Firebase User profile with username
-                                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                            .setDisplayName(username)
-                                            .build();
+                                // Create user object
+                                User newUser = User.getInstance();
+                                newUser.setUID(uid);
+                                newUser.setUsername(username); // From the EditText input
 
-                                    firebaseUser.updateProfile(profileUpdates);
-
-                                    Toast.makeText(context, "User created successfully!", Toast.LENGTH_LONG).show();
-                                    startActivity(new Intent(SignupPage.this, RecordPage.class)); // Navigate to main screen
-                                    finish();
-                                }
-                            } else {
+                                // Write to Firebase Database
+                                FBRef.refUsers.child(uid).setValue(newUser)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> dbTask) {
+                                                if (dbTask.isSuccessful()) {
+                                                    Toast.makeText(context, "User created and saved successfully", Toast.LENGTH_LONG).show();
+                                                    // Optional: Go to main screen
+                                                    startActivity(new Intent(SignupPage.this, RecordPage.class));
+                                                    finish();
+                                                } else {
+                                                    Toast.makeText(context, "Failed to save user data", Toast.LENGTH_LONG).show();
+                                                }
+                                            }
+                                        });
+                            }
+                            else {
                                 handleSignupError(task.getException());
                             }
                         }

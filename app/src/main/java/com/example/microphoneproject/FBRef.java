@@ -6,10 +6,8 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class FBRef {
     public static FirebaseAuth refAuth = FirebaseAuth.getInstance();
-
-    public static FirebaseDatabase FBDB = FirebaseDatabase.getInstance();
-
-    public static DatabaseReference refUsers=FBDB.getReference("Users");
-    public static DatabaseReference refRecordings=FBDB.getReference("Recordings");
+    public static FirebaseDatabase database = FirebaseDatabase.getInstance();
+    public static DatabaseReference refUsers = database.getReference("Users");
+    public static DatabaseReference refRecordings = database.getReference("Recordings");
 }
 

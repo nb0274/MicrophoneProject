@@ -31,13 +31,17 @@ android {
 
 dependencies {
 
+    // Firebase Authentication
+    implementation 'com.google.firebase:firebase-auth:22.3.0' // (you may already have this)
+
+    // Firebase Realtime Database
+    implementation 'com.google.firebase:firebase-database:20.3.0' // Add this line
+
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
-    implementation 'com.google.firebase:firebase-auth:23.1.0'
     implementation libs.firebase.auth
-    implementation 'com.google.firebase:firebase-storage:20.3.0'
     implementation libs.firebase.database
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
