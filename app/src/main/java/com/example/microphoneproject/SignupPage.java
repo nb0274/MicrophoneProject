@@ -29,6 +29,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+
+import Objects.User;
+
 public class SignupPage extends AppCompatActivity {
     Context context;
     EditText etEmail;
@@ -61,44 +65,66 @@ public class SignupPage extends AppCompatActivity {
         String username = etUsername.getText().toString();
         String password = etPassword.getText().toString();
 
-        if(email.isEmpty() || password.isEmpty() || username.isEmpty())
+        if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_LONG).show();
-        else {
+        } else {
             ProgressDialog pd = new ProgressDialog(this);
             pd.setTitle("Connecting");
             pd.setMessage("Creating user...");
             pd.show();
 
-            refAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    pd.dismiss();
+            refAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            pd.dismiss();
 
-                    if(task.isSuccessful()) {
-                        Toast.makeText(context, "User created successfully", Toast.LENGTH_LONG).show();
-                    }
-                    else {
-                        Exception exp = task.getException();
+                            if (task.isSuccessful()) {
+                                FirebaseUser firebaseUser = refAuth.getCurrentUser();
+                                if (firebaseUser != null) {
+                                    User user = User.getInstance();
+                                    user.setUID(firebaseUser.getUid());
+                                    user.setUsername(username);
 
-                        if(exp instanceof FirebaseAuthInvalidUserException)
-                            Toast.makeText(context, "Invalid email address", Toast.LENGTH_LONG).show();
-                        else if(exp instanceof FirebaseAuthWeakPasswordException)
-                            Toast.makeText(context, "Password too weak", Toast.LENGTH_LONG).show();
-                        else if(exp instanceof FirebaseAuthUserCollisionException)
-                            Toast.makeText(context, "User already exists", Toast.LENGTH_LONG).show();
-                        else if(exp instanceof FirebaseAuthInvalidCredentialsException)
-                            Toast.makeText(context, "General authentication failure", Toast.LENGTH_LONG).show();
-                        else if(exp instanceof FirebaseNetworkException)
-                            Toast.makeText(context, "Network error. Please check your connection", Toast.LENGTH_LONG).show();
-                        else
-                            Toast.makeText(context, "An error occurred, please try again later", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
+                                    // Optionally update Firebase User profile with username
+                                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                            .setDisplayName(username)
+                                            .build();
+
+                                    firebaseUser.updateProfile(profileUpdates);
+
+                                    Toast.makeText(context, "User created successfully!", Toast.LENGTH_LONG).show();
+                                    startActivity(new Intent(SignupPage.this, RecordPage.class)); // Navigate to main screen
+                                    finish();
+                                }
+                            } else {
+                                handleSignupError(task.getException());
+                            }
+                        }
+                    });
         }
-
     }
 
+    // Handles various signup errors
+    private void handleSignupError(Exception exp) {
+        if (exp instanceof FirebaseAuthInvalidUserException)
+            Toast.makeText(context, "Invalid email address", Toast.LENGTH_LONG).show();
+        else if (exp instanceof FirebaseAuthWeakPasswordException)
+            Toast.makeText(context, "Password too weak", Toast.LENGTH_LONG).show();
+        else if (exp instanceof FirebaseAuthUserCollisionException)
+            Toast.makeText(context, "User already exists", Toast.LENGTH_LONG).show();
+        else if (exp instanceof FirebaseAuthInvalidCredentialsException)
+            Toast.makeText(context, "General authentication failure", Toast.LENGTH_LONG).show();
+        else if (exp instanceof FirebaseNetworkException)
+            Toast.makeText(context, "Network error. Please check your connection", Toast.LENGTH_LONG).show();
+        else
+            Toast.makeText(context, "An error occurred, please try again later", Toast.LENGTH_LONG).show();
+    }
+
+
+    /*
+        gets you back to the login screen
+     */
     public void loginUser(View view) {
         finish();
     }

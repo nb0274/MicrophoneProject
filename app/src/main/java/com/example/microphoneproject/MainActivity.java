@@ -23,10 +23,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 
+import Objects.User;
+
 public class MainActivity extends AppCompatActivity {
 
     Intent si;
-
     EditText etEmail;
     EditText etPassword;
 
@@ -50,12 +51,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = refAuth.getCurrentUser();
-        if(currentUser != null){
-            // put the user details in the fields
+        if (currentUser != null) {
+            // Initialize the User singleton with current Firebase user details
+            User user = User.getInstance();
+            user.setUID(currentUser.getUid());
+            user.setUsername(currentUser.getDisplayName()); // Ensure displayName is set in Firebase
+
+            Toast.makeText(this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
+
+            // Redirect to the main app screen (RecordPage)
+            startActivity(new Intent(MainActivity.this, RecordPage.class));
+            finish(); // Prevents going back to login screen on pressing back
         }
     }
+
 
     public void loginUser(View view) {
         String email = etEmail.getText().toString();
@@ -67,8 +77,16 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            FirebaseUser user = refAuth.getCurrentUser();
-                            //updateUI(user);
+                            FirebaseUser firebaseUser = refAuth.getCurrentUser();
+                            if (firebaseUser != null) {
+                                User user = User.getInstance();
+                                user.setUID(firebaseUser.getUid());
+                                user.setUsername(firebaseUser.getDisplayName()); // Make sure username is set in Firebase Auth
+
+                                Toast.makeText(MainActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(MainActivity.this, RecordPage.class)); // Navigate to main screen
+                                finish();
+                            }
                         }
                         else {
                             // If sign in fails, display a message to the user.
