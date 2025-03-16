@@ -3,8 +3,8 @@ package Objects;
 public class Record {
     private double duration;
     private String UID;
-    private String RID;
-    private String RName;
+    private String rid;
+    private String rname;
 
     // Default constructor required for Firebase
     public Record() {}
@@ -13,8 +13,8 @@ public class Record {
     public Record(double duration, String UID, String RID, String RName) {
         this.duration = duration;
         this.UID = UID;
-        this.RID = RID;
-        this.RName = RName;
+        this.rid = RID;
+        this.rname = RName;
     }
 
     // Getters and Setters
@@ -34,19 +34,19 @@ public class Record {
         this.UID = UID;
     }
 
-    public String getRID() {
-        return RID;
+    public String getRid() {
+        return rid;
     }
 
-    public void setRID(String RID) {
-        this.RID = RID;
+    public void setRid(String rid) {
+        this.rid = rid;
     }
 
-    public String getRName() {
-        return RName;
+    public String getRname() {
+        return rname;
     }
 
-    public void setRName(String RName) {
-        this.RName = RName;
+    public void setRname(String rname) {
+        this.rname = rname;
     }
 }

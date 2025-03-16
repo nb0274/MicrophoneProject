@@ -3,7 +3,6 @@ package com.example.microphoneproject;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaRecorder;
@@ -12,29 +11,29 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import Objects.Record;
 import Objects.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class RecordPage extends AppCompatActivity {
@@ -49,6 +48,11 @@ public class RecordPage extends AppCompatActivity {
 
     private final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private User user = User.getInstance();
+
+    private ListView recordingsListView;
+    private ArrayAdapter<String> adapter;
+    private ArrayList<Record> recordingsList = new ArrayList<>();
+    private ArrayList<String> displayList = new ArrayList<>();
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -68,6 +72,18 @@ public class RecordPage extends AppCompatActivity {
         btnCancel.setEnabled(false);
         btnDone.setEnabled(false);
         resetButtons();
+
+        recordingsListView = findViewById(R.id.recordingsListView);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, displayList);
+        recordingsListView.setAdapter(adapter);
+
+        loadUserRecordings(); // Load recordings into the list
+
+        recordingsListView.setOnItemLongClickListener((parent, view, position, id) -> {
+            Record selectedRecord = recordingsList.get(position);
+            showRecordOptionsDialog(selectedRecord, position);
+            return true;
+        });
     }
 
     // onClick method for the "Record" button
@@ -216,7 +232,7 @@ public class RecordPage extends AppCompatActivity {
         }
 
         String rid = UUID.randomUUID().toString();
-        StorageReference storageRef = FirebaseStorage.getInstance().getReference("audio_files/" + rid + ".3gp");
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference("audio_files/" + rid + ".mp4");
 
         storageRef.putFile(Uri.fromFile(file))
                 .addOnProgressListener(taskSnapshot -> {
@@ -293,4 +309,175 @@ public class RecordPage extends AppCompatActivity {
             return super.onOptionsItemSelected(item);
         }
     }
+
+    private void loadUserRecordings() {
+        String uid = user.getUID();
+        FBRef.refRecordings.child(uid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                recordingsList.clear();
+                displayList.clear();
+
+                for (DataSnapshot recordSnapshot : snapshot.getChildren()) {
+                    Record record = recordSnapshot.getValue(Record.class);
+
+                    if (record != null) {
+                        record.setRid(recordSnapshot.getKey());
+
+                        recordingsList.add(record);
+                        displayList.add(record.getRname() + " (" + record.getDuration() + " sec)");
+                    }
+                }
+
+                adapter.notifyDataSetChanged(); // Update ListView
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(RecordPage.this, "Failed to load recordings.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void showRecordOptionsDialog(Record record, int position) {
+        final String[] options = {"Play", "Rename", "Delete", "Convert to Text"};
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select Action")
+                .setItems(options, (dialog, which) -> {
+                    switch (which) {
+                        case 0: // Play
+                            playRecording(record);
+                            break;
+                        case 1:
+                            showRenameDialog(record, position);
+                            break;
+                        case 2:
+                            deleteRecording(record, position);
+                            break;
+                        case 3:
+                            Toast.makeText(this, "Convert " + record.getRname() + " to text", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                });
+        builder.show();
+    }
+
+    private void showRenameDialog(Record record, int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Rename Recording");
+
+        final EditText input = new EditText(this);
+        builder.setView(input);
+
+        builder.setPositiveButton("Rename", (dialog, which) -> {
+            String newName = input.getText().toString().trim();
+            if (!newName.isEmpty()) {
+                checkAndRename(record, newName, position);
+            } else {
+                Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        builder.show();
+    }
+
+    private void checkAndRename(Record record, String newName, int position) {
+        String uid = user.getUID();
+        String rid = record.getRid();  // Get the existing record ID
+
+        if (rid == null || rid.isEmpty()) {
+            Toast.makeText(RecordPage.this, "Error: Invalid recording ID.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        newName = newName.trim(); // Trim whitespace
+        if (newName.equalsIgnoreCase(record.getRname().trim())) {
+            Toast.makeText(RecordPage.this, "New name is the same as the current name.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if the new name already exists
+        String finalNewName = newName;
+        FBRef.refRecordings.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean exists = false;
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    String existingName = child.child("rname").getValue(String.class);
+                    if (existingName != null && existingName.trim().equalsIgnoreCase(finalNewName)) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (exists) {
+                    Toast.makeText(RecordPage.this, "Recording name already exists.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Rename in the database
+                    FBRef.refRecordings.child(uid).child(rid).child("rname").setValue(finalNewName)
+                            .addOnSuccessListener(aVoid -> {
+                                record.setRname(finalNewName); // Update local object
+                                displayList.set(position, finalNewName + " (" + record.getDuration() + " sec)");
+                                adapter.notifyDataSetChanged(); // Refresh ListView
+                                Toast.makeText(RecordPage.this, "Renamed successfully.", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(RecordPage.this, "Rename failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(RecordPage.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void deleteRecording(Record record, int position) {
+        String uid = user.getUID();
+
+        if (record == null || record.getRid() == null) {
+            Toast.makeText(this, "Error: Invalid recording ID.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String rid = record.getRid();
+        StorageReference storageRef = FirebaseStorage.getInstance().getReference("audio_files/" + rid + ".mp4");
+
+        storageRef.delete()
+                .addOnSuccessListener(aVoid -> {
+                    // Remove from Firebase Database
+                    FBRef.refRecordings.child(uid).child(rid).removeValue()
+                            .addOnSuccessListener(aVoid1 -> {
+                                // Ensure valid position before removing from list
+                                if (position >= 0 && position < recordingsList.size()) {
+                                    recordingsList.remove(position);
+                                    displayList.remove(position);
+                                }
+
+                                // **Force refresh the list by clearing and reloading**
+                                adapter.notifyDataSetChanged();
+                                loadUserRecordings(); // Refresh list from Firebase
+
+                                Toast.makeText(this, "Deleted successfully.", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to delete from database: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to delete from storage: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void playRecording(Record record) {
+        Intent intent = new Intent(RecordPage.this, PlayRecordingActivity.class);
+        intent.putExtra("RECORD_ID", record.getRid());  // Pass only the rid
+        startActivity(intent);
+    }
+
 }
