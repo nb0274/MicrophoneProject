@@ -52,25 +52,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        FirebaseUser currentUser = refAuth.getCurrentUser();
-        if (currentUser != null) {
-            // Initialize the User singleton with current Firebase user details
-            User user = User.getInstance();
-            user.setUID(currentUser.getUid());
-            user.setUsername(currentUser.getDisplayName()); // Ensure displayName is set in Firebase
-
-            Toast.makeText(this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
-
-            // Redirect to the main app screen (RecordPage)
-            startActivity(new Intent(MainActivity.this, RecordPage.class));
-            finish(); // Prevents going back to login screen on pressing back
-        }
+//        FirebaseUser currentUser = refAuth.getCurrentUser();
+//        if (currentUser != null) {
+//            // Initialize the User singleton with current Firebase user details
+//            User user = User.getInstance();
+//            user.setUID(currentUser.getUid());
+//            user.setUsername(currentUser.getDisplayName()); // Ensure displayName is set in Firebase
+//
+//            Toast.makeText(this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
+//
+//            // Redirect to the main app screen (RecordPage)
+//            startActivity(new Intent(MainActivity.this, RecordPage.class));
+//            finish(); // Prevents going back to login screen on pressing back
+//        }
     }
 
 
     public void loginUser(View view) {
-        String email = etEmail.getText().toString();
-        String password = etPassword.getText().toString();
+        String email = etEmail.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         refAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -80,38 +85,33 @@ public class MainActivity extends AppCompatActivity {
                             FirebaseUser firebaseUser = refAuth.getCurrentUser();
                             String uid = firebaseUser.getUid();
 
-                            // Fetch user data from DB
+                            // Fetch user data from Realtime Database (without password check)
                             FBRef.refUsers.child(uid).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<DataSnapshot> dbTask) {
-                                    if (dbTask.isSuccessful()) {
-                                        if (dbTask.getResult().exists()) {
-                                            User user = User.getInstance();
-                                            user.setUID(uid);
-                                            user.setUsername(dbTask.getResult().child("username").getValue(String.class));
+                                    if (dbTask.isSuccessful() && dbTask.getResult().exists()) {
+                                        User user = User.getInstance();
+                                        user.setUID(uid);
+                                        user.setUsername(dbTask.getResult().child("username").getValue(String.class));
+                                        user.setPassword(password); // Just storing in memory, if needed
 
-                                            Toast.makeText(MainActivity.this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
 
-                                            // Go to main app page
-                                            startActivity(new Intent(MainActivity.this, RecordPage.class));
-                                            finish();
-                                        } else {
-                                            Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_LONG).show();
-                                        }
+                                        // Go to main app page
+                                        startActivity(new Intent(MainActivity.this, RecordPage.class));
+                                        finish();
                                     } else {
-                                        Toast.makeText(MainActivity.this, "Failed to retrieve user data", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
-                        }
-                        else {
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Authentication failed. Check email and password.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
+
 
     public void createUser(View view) {
         si = new Intent(this, SignupPage.class);

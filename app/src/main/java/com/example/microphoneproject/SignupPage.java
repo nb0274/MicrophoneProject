@@ -61,9 +61,9 @@ public class SignupPage extends AppCompatActivity {
 
 
     public void createUser(View view) {
-        String email = etEmail.getText().toString();
-        String username = etUsername.getText().toString();
-        String password = etPassword.getText().toString();
+        String email = etEmail.getText().toString().trim();
+        String username = etUsername.getText().toString().trim();
+        String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty() || username.isEmpty()) {
             Toast.makeText(this, "Please fill all fields", Toast.LENGTH_LONG).show();
@@ -79,16 +79,16 @@ public class SignupPage extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             pd.dismiss();
 
-                            if(task.isSuccessful()) {
+                            if (task.isSuccessful()) {
                                 FirebaseUser firebaseUser = refAuth.getCurrentUser();
                                 String uid = firebaseUser.getUid(); // Get the UID of the newly created user
 
-                                // Create user object
                                 User newUser = User.getInstance();
                                 newUser.setUID(uid);
-                                newUser.setUsername(username); // From the EditText input
+                                newUser.setUsername(username);
+                                newUser.setPassword(password);
 
-                                // Write to Firebase Database
+                                // ✅ Write user data to Firebase Database
                                 FBRef.refUsers.child(uid).setValue(newUser)
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
@@ -103,14 +103,14 @@ public class SignupPage extends AppCompatActivity {
                                                 }
                                             }
                                         });
-                            }
-                            else {
+                            } else {
                                 handleSignupError(task.getException());
                             }
                         }
                     });
         }
     }
+
 
     // Handles various signup errors
     private void handleSignupError(Exception exp) {
@@ -132,7 +132,7 @@ public class SignupPage extends AppCompatActivity {
     /*
         gets you back to the login screen
      */
-    public void loginUser(View view) {
+    public void returnToLoginUser(View view) {
         finish();
     }
 
