@@ -1,5 +1,7 @@
 package Objects;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 public class User {
     private static User instance; // Singleton instance
     private String UID;
@@ -23,7 +25,7 @@ public class User {
 
     // Getters and Setters
     public String getUID() {
-        return UID;
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
     public void setUID(String UID) {

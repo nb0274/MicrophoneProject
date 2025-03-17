@@ -27,6 +27,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/DEPENDENCIES'
+    }
 }
 
 dependencies {
@@ -37,6 +41,10 @@ dependencies {
     // Firebase Realtime Database
     implementation 'com.google.firebase:firebase-database:20.3.0' // Add this line
     implementation 'com.google.firebase:firebase-storage:20.3.0' // check for latest version
+
+    implementation 'com.google.cloud:google-cloud-speech:2.4.0' // Google Speech-to-Text API
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.18.0'
+
 
     implementation libs.appcompat
     implementation libs.material

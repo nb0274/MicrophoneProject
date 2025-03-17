@@ -356,7 +356,7 @@ public class RecordPage extends AppCompatActivity {
                             deleteRecording(record, position);
                             break;
                         case 3:
-                            Toast.makeText(this, "Convert " + record.getRname() + " to text", Toast.LENGTH_SHORT).show();
+                            openConvertTextActivity(record);
                             break;
                     }
                 });
@@ -479,5 +479,12 @@ public class RecordPage extends AppCompatActivity {
         intent.putExtra("RECORD_ID", record.getRid());  // Pass only the rid
         startActivity(intent);
     }
+
+    private void openConvertTextActivity(Record record) {
+        Intent intent = new Intent(this, ConvertTextActivity.class);
+        intent.putExtra("rid", record.getRid()); // Pass the record ID
+        startActivity(intent);
+    }
+
 
 }
