@@ -21,9 +21,6 @@
             android:name=".ConvertTextActivity"
             android:exported="false" />
         <activity
-            android:name=".openConvertTextActivity"
-            android:exported="false" />
-        <activity
             android:name=".PlayRecordingActivity"
             android:exported="false" />
         <activity

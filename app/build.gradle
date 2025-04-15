@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.microphoneproject"
-        minSdk 24
+        minSdk 28
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -40,10 +40,24 @@ dependencies {
 
     // Firebase Realtime Database
     implementation 'com.google.firebase:firebase-database:20.3.0' // Add this line
-    implementation 'com.google.firebase:firebase-storage:20.3.0' // check for latest version
+    //implementation 'com.google.firebase:firebase-storage:20.3.0' // check for latest version
 
-    implementation 'com.google.cloud:google-cloud-speech:2.4.0' // Google Speech-to-Text API
+    //implementation 'com.google.cloud:google-cloud-speech:4.54.0' // Google Speech-to-Text API
+    //implementation 'com.google.auth:google-auth-library-oauth2-http:1.18.0'
+
+
+
+    implementation 'com.google.cloud:google-cloud-speech:4.54.0'
     implementation 'com.google.auth:google-auth-library-oauth2-http:1.18.0'
+    implementation 'com.google.protobuf:protobuf-java:3.25.1'
+    implementation 'com.google.firebase:firebase-storage:20.3.0' // or latest version
+
+    configurations.all {
+        exclude group: 'com.google.protobuf', module: 'protobuf-javalite'
+    }
+
+
+
 
 
     implementation libs.appcompat
