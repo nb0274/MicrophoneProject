@@ -112,7 +112,7 @@ public class ConvertTextActivity extends AppCompatActivity {
                             .build();
                     // Specify the GCS URI of the uploaded audio
                     RecognitionAudio audio = RecognitionAudio.newBuilder()
-                            .setUri("gs://" + BUCKET_NAME + "/" + rid + ".wav")
+                            .setUri("gs://" + BUCKET_NAME + "/transcripts" + "/" + rid + ".wav")
                             .build();
                     // Transcribe the audio file (synchronous recognition)
                     RecognizeResponse response = speechClient.recognize(config, audio);
