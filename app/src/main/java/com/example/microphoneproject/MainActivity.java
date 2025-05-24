@@ -146,7 +146,6 @@ MainActivity extends AppCompatActivity {
         return true;
     }
 
-    // efef
 //    @Override
 //    public boolean onOptionsItemSelected(MenuItem item) {
 //        int id = item.getItemId();
