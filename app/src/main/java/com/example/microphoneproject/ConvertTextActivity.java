@@ -341,7 +341,7 @@ public class ConvertTextActivity extends AppCompatActivity {
             // Construct the GCS upload URL (using uploadType=media for direct upload)
             String urlStr = "https://storage.googleapis.com/upload/storage/v1/b/"
                     + URLEncoder.encode(bucketName, "UTF-8")
-                    + "/o?uploadType=media&name=" + URLEncoder.encode(objectName, "UTF-8");
+                    + "/o?uploadType=media&name=" + URLEncoder.encode("transcripts/" + objectName, "UTF-8");
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);

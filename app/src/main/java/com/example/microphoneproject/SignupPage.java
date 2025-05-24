@@ -2,6 +2,7 @@ package com.example.microphoneproject;
 
 import static com.example.microphoneproject.FBRef.refAuth;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -95,10 +96,14 @@ public class SignupPage extends AppCompatActivity {
                                             public void onComplete(@NonNull Task<Void> dbTask) {
                                                 if (dbTask.isSuccessful()) {
                                                     Toast.makeText(context, "User created and saved successfully", Toast.LENGTH_LONG).show();
-                                                    // Optional: Go to main screen
-                                                    startActivity(new Intent(SignupPage.this, RecordPage.class));
+
+                                                    Intent resultIntent = new Intent();
+                                                    resultIntent.putExtra("email", email);
+                                                    resultIntent.putExtra("password", password);
+                                                    setResult(Activity.RESULT_OK, resultIntent);
                                                     finish();
-                                                } else {
+                                                }
+                                                else {
                                                     Toast.makeText(context, "Failed to save user data", Toast.LENGTH_LONG).show();
                                                 }
                                             }
@@ -142,33 +147,33 @@ public class SignupPage extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.menuLogIn) {
-            startActivity(new Intent(SignupPage.this, MainActivity.class));
-            return true;
-        } else if (id == R.id.menuSignUp) {
-            // Already in Sign Up activity; no need for action here
-            return true;
-        } else if (id == R.id.menuRecordPage) {
-            startActivity(new Intent(SignupPage.this, RecordPage.class));
-            return true;
-        } else if (id == R.id.menuRecordList) {
-            startActivity(new Intent(SignupPage.this, RecordsList.class));
-            return true;
-        } else if (id == R.id.menuAlphaBtnRecord) {
-            startActivity(new Intent(SignupPage.this, Alpha_BtnRecord.class));
-            return true;
-        } else if (id == R.id.menuAlphaChooseFile) {
-            startActivity(new Intent(SignupPage.this, Alpha_ChooseFile.class));
-            return true;
-        } else if (id == R.id.menuStorageImport) {
-            startActivity(new Intent(SignupPage.this, Alpha_StorageImport.class));
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        int id = item.getItemId();
+//
+//        if (id == R.id.menuLogIn) {
+//            startActivity(new Intent(SignupPage.this, MainActivity.class));
+//            return true;
+//        } else if (id == R.id.menuSignUp) {
+//            // Already in Sign Up activity; no need for action here
+//            return true;
+//        } else if (id == R.id.menuRecordPage) {
+//            startActivity(new Intent(SignupPage.this, RecordPage.class));
+//            return true;
+//        } else if (id == R.id.menuRecordList) {
+//            startActivity(new Intent(SignupPage.this, RecordsList.class));
+//            return true;
+//        } else if (id == R.id.menuAlphaBtnRecord) {
+//            startActivity(new Intent(SignupPage.this, Alpha_BtnRecord.class));
+//            return true;
+//        } else if (id == R.id.menuAlphaChooseFile) {
+//            startActivity(new Intent(SignupPage.this, Alpha_ChooseFile.class));
+//            return true;
+//        } else if (id == R.id.menuStorageImport) {
+//            startActivity(new Intent(SignupPage.this, Alpha_StorageImport.class));
+//            return true;
+//        } else {
+//            return super.onOptionsItemSelected(item);
+//        }
+//    }
 }
