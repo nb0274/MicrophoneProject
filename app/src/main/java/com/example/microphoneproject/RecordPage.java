@@ -86,26 +86,63 @@ public class RecordPage extends AppCompatActivity {
         });
     }
 
-    // onClick method for the "Record" button
+    /**
+     * Handles a click of a record button, to start audio recording.
+     * <p>
+     * This method delegates the action of starting the recording process to the
+     * {@code startRecording()} method.
+     *
+     * @param view The view that was clicked to trigger the recording (e.g., a record button).
+     */
     public void onRecordClicked(View view) {
         startRecording();
     }
 
-    // onClick method for the "Pause/Continue" button
+    /**
+     * Handles a click of a pause/continue button, to toggle the recording state.
+     * <p>
+     * This method delegates the action of pausing or resuming the recording
+     * to the {@code togglePauseContinue()} method.
+     *
+     * @param view The view that was clicked to trigger the pause/continue action (e.g., a button).
+     */
     public void onPauseContinueClicked(View view) {
         togglePauseContinue();
     }
 
-    // onClick method for the "Cancel" button
+    /**
+     * Handles a click of a cancel button, to stop and discard the current recording.
+     * <p>
+     * This method delegates the action of canceling the ongoing recording
+     * to the {@code cancelRecording()} method.
+     *
+     * @param view The view that was clicked to trigger the cancel action (e.g., a cancel button).
+     */
     public void onCancelClicked(View view) {
         cancelRecording();
     }
 
-    // onClick method for the "Done" button
+    /**
+     * Handles a click event of a "done" button, to finalize the current recording.
+     * <p>
+     * This method delegates the action of completing and saving the ongoing recording
+     * to the {@code finishRecording()} method.
+     *
+     * @param view The view that was clicked to trigger the finalization of the recording (e.g., a done button).
+     */
     public void onDoneClicked(View view) {
         finishRecording();
     }
 
+    /**
+     * Initializes and starts an audio recording using {@link MediaRecorder}.
+     * <p>
+     * This method configures the MediaRecorder with an audio source (microphone), output format (MPEG_4),
+     * output file path, and audio encoder (AAC). It then prepares and starts the recorder.
+     * It also updates the UI button states to reflect the recording state, records the start time,
+     * resets pause-related timers, and displays a toast message. Handles potential IOExceptions
+     * during preparation or start.
+     */
     private void startRecording() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -131,6 +168,16 @@ public class RecordPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Toggles the recording state between paused and resumed for Android N (API 24) and above.
+     * <p>
+     * If the recording is currently paused, it resumes the {@link MediaRecorder}, updates the
+     * pause/continue button text to "Pause", calculates the time spent paused, and sets
+     * {@code isPaused} to false.
+     * If the recording is active, it pauses the MediaRecorder, updates the button text to "Continue",
+     * records the time when pausing started, and sets {@code isPaused} to true.
+     * For devices below Android N, it shows a toast indicating that pause/continue is not supported.
+     */
     private void togglePauseContinue() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             if (isPaused) {
@@ -149,6 +196,14 @@ public class RecordPage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Stops the current recording, releases {@link MediaRecorder} resources, and deletes the recorded audio file.
+     * <p>
+     * If a {@code mediaRecorder} instance exists, it is stopped and released.
+     * The UI buttons are reset to their initial state via {@code resetButtons()}.
+     * The audio file specified by {@code audioFilePath} is deleted if it exists.
+     * Finally, a toast message confirms the cancellation.
+     */
     private void cancelRecording() {
         if (mediaRecorder != null) {
             mediaRecorder.stop();
@@ -161,6 +216,15 @@ public class RecordPage extends AppCompatActivity {
         Toast.makeText(this, "Recording canceled.", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Finalizes the current audio recording, prompts the user to save it, and then processes the save operation.
+     * <p>
+     * This method first stops and releases the {@link MediaRecorder}, ensuring it's resumed if paused (for API 24+).
+     * It calculates the recording duration, then displays an {@link AlertDialog} to get a name for the recording.
+     * If a name is provided, it delegates to {@code checkAndSaveRecording()} to handle the saving process.
+     * Finally, it resets the UI button states via {@code resetButtons()}.
+     * It includes error handling for stopping the MediaRecorder.
+     */
     private void finishRecording() {
         if (mediaRecorder != null) {
             if (isPaused && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -200,6 +264,17 @@ public class RecordPage extends AppCompatActivity {
         resetButtons(); // Move this here to reset state after finishing recording
     }
 
+    /**
+     * Checks if a recording with the given name already exists for the current user in Firebase.
+     * <p>
+     * If a recording with the same name does not exist, it proceeds to upload the audio file
+     * by calling {@code uploadAudioFile()}. If a recording with the same name exists,
+     * a toast message is displayed to the user. It also handles potential failures
+     * when trying to fetch existing recording names from Firebase.
+     *
+     * @param rName    The desired name for the new recording.
+     * @param duration The duration of the recording in seconds.
+     */
     private void checkAndSaveRecording(String rName, double duration) {
         String uid = user.getUID();
 
@@ -224,6 +299,22 @@ public class RecordPage extends AppCompatActivity {
         });
     }
 
+    /**
+     * Uploads the recorded audio file to Firebase Storage and saves its metadata to the Firebase Realtime Database.
+     * <p>
+     * First, it checks if the local audio file exists. If not, it shows a toast and returns.
+     * It generates a unique recording ID (RID) and creates a {@link StorageReference} to Firebase Storage.
+     * The file is then uploaded using {@code putFile()}.
+     * During the upload, progress is displayed via a toast message.
+     * On successful upload, a {@link java.lang.Record} object containing metadata (duration, RID, UID, recording name)
+     * is created and saved to the Firebase Realtime Database under the user's ID and the new RID.
+     * If saving metadata is successful, a success toast is shown and the local audio file is deleted.
+     * Failures during upload or metadata saving are communicated via toast messages.
+     *
+     * @param uid      The unique ID of the user.
+     * @param rName    The name of the recording.
+     * @param duration The duration of the recording in seconds.
+     */
     private void uploadAudioFile(String uid, String rName, double duration) {
         File file = new File(audioFilePath);
         if (!file.exists()) {
@@ -256,8 +347,13 @@ public class RecordPage extends AppCompatActivity {
                 });
     }
 
-
-
+    /**
+     * Resets the state of UI buttons and recording flags to their initial, non-recording state.
+     * <p>
+     * This method enables the record button and disables the pause/continue, cancel, and done buttons.
+     * It also sets the text of the pause/continue button back to "Pause" and resets
+     * the {@code isRecording} and {@code isPaused} boolean flags to false.
+     */
     private void resetButtons() {
         btnRecord.setEnabled(true);
         btnPauseContinue.setEnabled(false);
@@ -268,18 +364,44 @@ public class RecordPage extends AppCompatActivity {
         isPaused = false;
     }
 
+    /**
+     * Checks if the app has the {@link Manifest.permission#RECORD_AUDIO} permission.
+     * <p>
+     * If the permission has not been granted, it requests the permission from the user.
+     * The result of the permission request is handled in {@code onRequestPermissionsResult}.
+     */
     private void checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
         }
     }
 
+    /**
+     * Initializes the contents of the Activity's standard options menu.
+     * <p>
+     * This method inflates the menu resource (defined in {@code R.menu.main}) into the
+     * {@link Menu} object. This is called only once, the first time the options menu is displayed.
+     *
+     * @param menu The options menu in which items are placed.
+     * @return You must return true for the menu to be displayed; if you return false it will not be shown.
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
         return true;
     }
 
+    /**
+     * Loads and displays the current user's recordings from Firebase Realtime Database.
+     * <p>
+     * It attaches a {@link ValueEventListener} to the user's recordings path in Firebase.
+     * On data change, it clears existing local lists ({@code recordingsList} and {@code displayList}),
+     * then iterates through the retrieved {@link DataSnapshot}s. For each recording, it deserializes
+     * it into a {@link java.lang.Record} object, sets its unique ID (RID) from the snapshot key,
+     * and adds the Record object and a display string (name and duration) to the respective lists.
+     * Finally, it notifies the {@code adapter} to refresh the ListView.
+     * If data loading is cancelled or fails, a toast message is shown.
+     */
     private void loadUserRecordings() {
         String uid = user.getUID();
         FBRef.refRecordings.child(uid).addValueEventListener(new ValueEventListener() {
@@ -309,7 +431,21 @@ public class RecordPage extends AppCompatActivity {
         });
     }
 
-
+    /**
+     * Displays an {@link AlertDialog} with options for a selected recording.
+     * <p>
+     * The dialog presents the user with options: "Play", "Rename", "Delete", and "Convert to Text".
+     * Based on the user's selection, it calls the corresponding method:
+     * <ul>
+     *     <li>"Play": {@code playRecording(record)}</li>
+     *     <li>"Rename": {@code showRenameDialog(record, position)}</li>
+     *     <li>"Delete": {@code deleteRecording(record, position)}</li>
+     *     <li>"Convert to Text": {@code openConvertTextActivity(record)}</li>
+     * </ul>
+     *
+     * @param record   The {@link java.lang.Record} object for which to show options.
+     * @param position The position of the selected recording in the list, used for rename/delete operations.
+     */
     private void showRecordOptionsDialog(Record record, int position) {
         final String[] options = {"Play", "Rename", "Delete", "Convert to Text"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -333,6 +469,18 @@ public class RecordPage extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Displays an {@link AlertDialog} to allow the user to rename a recording.
+     * <p>
+     * The dialog includes an {@link EditText} field for the new name.
+     * If the user enters a non-empty name and clicks "Rename", it calls
+     * {@code checkAndRename(record, newName, position)} to process the renaming.
+     * If the name is empty, a toast message is shown.
+     * The dialog also has a "Cancel" button.
+     *
+     * @param record   The {@link java.lang.Record} object to be renamed.
+     * @param position The position of the recording in the list, passed to {@code checkAndRename}.
+     */
     private void showRenameDialog(Record record, int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Rename Recording");
@@ -353,6 +501,22 @@ public class RecordPage extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Checks for recording ID validity and name uniqueness, then renames a recording in Firebase and updates local data.
+     * <p>
+     * It first validates the recording ID (RID). If invalid, it shows an error toast and returns.
+     * It then checks if the new name is the same as the current name (case-insensitive, trimmed); if so, it shows a toast and returns.
+     * Next, it queries Firebase to see if another recording by the current user already has the proposed new name.
+     * If the new name already exists, a toast is shown.
+     * Otherwise, it updates the 'rname' field for the recording in Firebase Realtime Database.
+     * On successful database update, it updates the local {@link java.lang.Record} object, the corresponding entry in
+     * {@code displayList}, notifies the {@code adapter} to refresh the ListView, and shows a success toast.
+     * Failures during database operations are communicated via toast messages.
+     *
+     * @param record   The {@link java.lang.Record} object to be renamed.
+     * @param newName  The proposed new name for the recording.
+     * @param position The position of the recording in the {@code displayList} for UI update.
+     */
     private void checkAndRename(Record record, String newName, int position) {
         String uid = user.getUID();
         String rid = record.getRid();  // Get the existing record ID
@@ -406,7 +570,24 @@ public class RecordPage extends AppCompatActivity {
         });
     }
 
-
+    /**
+     * Deletes a specified recording from Firebase Storage and its metadata from Firebase Realtime Database.
+     * <p>
+     * It first validates the provided {@link java.lang.Record} object and its ID (RID). If invalid, an error toast is shown.
+     * It then attempts to delete the corresponding audio file (e.g., "audio_files/rid.mp4") from Firebase Storage.
+     * <ul>
+     *     <li>If storage deletion is successful, it proceeds to remove the recording's metadata
+     *         from the Firebase Realtime Database (at path {@code /recordings/uid/rid}).</li>
+     *     <li>If database deletion is also successful, it removes the recording from local lists
+     *         ({@code recordingsList} and {@code displayList}) if the provided {@code position} is valid.
+     *         It then calls {@code adapter.notifyDataSetChanged()} and {@code loadUserRecordings()}
+     *         to refresh the displayed list from Firebase, and shows a success toast.</li>
+     *     <li>Failures at any stage (storage deletion, database deletion) are communicated via toast messages.</li>
+     * </ul>
+     *
+     * @param record   The {@link java.lang.Record} object representing the recording to be deleted.
+     * @param position The position of the recording in the local lists, used for removal and UI update.
+     */
     private void deleteRecording(Record record, int position) {
         String uid = user.getUID();
 
@@ -444,17 +625,31 @@ public class RecordPage extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Starts {@link PlayRecordingActivity} to play the selected recording.
+     * <p>
+     * It creates an {@link Intent} to launch {@code PlayRecordingActivity} and passes the
+     * recording ID (RID) of the given {@link java.lang.Record} object as an extra with the key "RECORD_ID".
+     *
+     * @param record The {@link java.lang.Record} object whose recording is to be played.
+     */
     private void playRecording(Record record) {
         Intent intent = new Intent(RecordPage.this, PlayRecordingActivity.class);
         intent.putExtra("RECORD_ID", record.getRid());  // Pass only the rid
         startActivity(intent);
     }
 
+    /**
+     * Opens the {@link ConvertTextActivity} to process the selected recording for speech-to-text conversion.
+     * <p>
+     * It creates an {@link Intent} to launch {@code ConvertTextActivity} and passes the
+     * recording ID (RID) of the given {@link java.lang.Record} object as an extra with the key "rid".
+     *
+     * @param record The {@link java.lang.Record} object whose recording is to be converted to text.
+     */
     private void openConvertTextActivity(Record record) {
         Intent intent = new Intent(this, ConvertTextActivity.class);
         intent.putExtra("rid", record.getRid()); // Pass the record ID
         startActivity(intent);
     }
-
-
 }

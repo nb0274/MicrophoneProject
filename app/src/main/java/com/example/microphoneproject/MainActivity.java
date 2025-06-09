@@ -55,6 +55,7 @@ MainActivity extends AppCompatActivity {
     }
 
     @Override
+
     public void onStart() {
         super.onStart();
 //        FirebaseUser currentUser = refAuth.getCurrentUser();
@@ -73,6 +74,18 @@ MainActivity extends AppCompatActivity {
     }
 
 
+
+    /**
+     * Attempts to log in a user with Firebase using email and password from EditText fields.
+     * <p>
+     * Validates input, then uses Firebase Authentication. On successful authentication,
+     * it fetches the username from Firebase Realtime Database, updates a User singleton,
+     * displays a welcome message, navigates to {@code RecordPage}, and finishes the current activity.
+     * Shows appropriate Toasts for empty fields, authentication failure, or if user data
+     * is not found in the Realtime Database.
+     *
+     * @param view The View that triggered this login attempt (e.g., a login button).
+     */
     public void loginUser(View view) {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
@@ -118,11 +131,29 @@ MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Navigates the user to the {@link SignupPage} to create a new account.
+     * <p>
+     * This method is typically triggered by a UI element (e.g., a "Sign Up" button).
+     * It launches the {@code SignupPage} activity using an {@code ActivityResultLauncher}
+     * ({@code signUpLauncher}) to potentially receive results back from the sign-up process.
+     *
+     * @param view The View that triggered this navigation (e.g., a sign-up button).
+     */
     public void createUser(View view) {
         Intent intent = new Intent(this, SignupPage.class);
         signUpLauncher.launch(intent);
     }
 
+    /**
+     * An {@link ActivityResultLauncher} responsible for handling the result from the {@link SignupPage}.
+     * <p>
+     * When the {@code SignupPage} finishes successfully ({@code Activity.RESULT_OK}) and returns data,
+     * this launcher extracts the "email" and "password" extras from the result Intent.
+     * It then populates the {@code etEmail} and {@code etPassword} EditText fields in the
+     * current activity with these values, effectively pre-filling the login form with the newly
+     * created credentials. If the result is not OK or no data is returned, it does nothing.
+     */
     private ActivityResultLauncher<Intent> signUpLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {

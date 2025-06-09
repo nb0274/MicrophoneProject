@@ -1,6 +1,7 @@
 package com.example.microphoneproject;
 
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,6 +56,7 @@ public class ConvertTextActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_convert_text);
         transcriptText = findViewById(R.id.txtTranscription);
+        transcriptText.setMovementMethod(new ScrollingMovementMethod()); // for scroll bar
 
         final String rid = getIntent().getStringExtra("rid");
         if (rid == null || rid.isEmpty()) {
@@ -130,6 +132,18 @@ public class ConvertTextActivity extends AppCompatActivity {
         }).start();
     }
 
+    /**
+     * Decodes an MP4 audio file to a WAV audio file, downmixing to mono and resampling to 16000 Hz if necessary.
+     * <p>
+     * Uses {@link MediaExtractor} to read the MP4, {@link MediaCodec} for decoding to PCM,
+     * and then processes the PCM data (downmixing stereo to mono, resampling to 16kHz).
+     * Finally, it writes the processed PCM data to a WAV file, including a proper WAV header.
+     * Throws an IOException if no audio track is found or if other I/O errors occur.
+     *
+     * @param mp4Path The absolute path to the input MP4 file.
+     * @param wavPath The absolute path where the output WAV file will be saved.
+     * @throws java.io.IOException If an I/O error occurs or no audio track is found.
+     */
     private void decodeMp4ToWav(String mp4Path, String wavPath) throws IOException {
         MediaExtractor extractor = new MediaExtractor();
         extractor.setDataSource(mp4Path);
@@ -227,6 +241,20 @@ public class ConvertTextActivity extends AppCompatActivity {
         wavFile.close();
     }
 
+    /**
+     * Writes a standard 44-byte WAV file header to the given {@link DataOutput} stream.
+     * <p>
+     * This method populates the header with RIFF, WAVE, format ("fmt "), and data chunks,
+     * using the provided audio parameters like raw data size, sample rate, number of channels,
+     * and bits per sample. All multi-byte values are written in little-endian byte order.
+     *
+     * @param out           The DataOutput stream to write the header to.
+     * @param rawDataSize   The size of the raw PCM audio data in bytes (excluding the header).
+     * @param sampleRate    The audio sample rate (e.g., 16000 Hz).
+     * @param channels      The number of audio channels (e.g., 1 for mono).
+     * @param bitsPerSample The number of bits per audio sample (e.g., 16).
+     * @throws java.io.IOException If an I/O error occurs during writing.
+     */
     private void writeWavHeader(DataOutput out, int rawDataSize, int sampleRate, int channels, int bitsPerSample) throws IOException {
         out.writeBytes("RIFF");
         out.writeInt(Integer.reverseBytes(36 + rawDataSize));
@@ -245,6 +273,15 @@ public class ConvertTextActivity extends AppCompatActivity {
         out.writeInt(Integer.reverseBytes(rawDataSize));
     }
 
+    /**
+     * Converts 16-bit little-endian stereo PCM audio data to mono by averaging left and right channels.
+     * <p>
+     * Takes a byte array of interleaved stereo samples (L/R, L/R, ...) and returns a new
+     * byte array containing mono samples, which will be half the length of the input.
+     *
+     * @param stereoData Byte array of 16-bit little-endian stereo PCM data.
+     * @return New byte array containing 16-bit little-endian mono PCM data.
+     */
     private byte[] downmixToMono(byte[] stereoData) {
         ByteBuffer buffer = ByteBuffer.wrap(stereoData).order(ByteOrder.LITTLE_ENDIAN);
         int totalSamples = stereoData.length / 2;
@@ -259,6 +296,18 @@ public class ConvertTextActivity extends AppCompatActivity {
         return monoBuffer.array();
     }
 
+    /**
+     * Resamples 16-bit little-endian PCM audio data from a source to a target sample rate using linear interpolation.
+     * <p>
+     * If the source and target sample rates are identical, the original data is returned.
+     * Otherwise, a new byte array containing the resampled audio is generated.
+     *
+     * @param pcmData          Byte array of 16-bit little-endian PCM audio.
+     * @param srcSampleRate    The original sample rate in Hz.
+     * @param targetSampleRate The desired sample rate in Hz.
+     * @return Byte array of resampled 16-bit little-endian PCM audio, or the original
+     *         {@code pcmData} if sample rates are the same.
+     */
     private byte[] resamplePCM(byte[] pcmData, int srcSampleRate, int targetSampleRate) {
         if (srcSampleRate == targetSampleRate) return pcmData;
         ByteBuffer srcBuffer = ByteBuffer.wrap(pcmData).order(ByteOrder.LITTLE_ENDIAN);
@@ -278,6 +327,30 @@ public class ConvertTextActivity extends AppCompatActivity {
         return outBuffer.array();
     }
 
+    /**
+     * Uploads a local file to Google Cloud Storage (GCS) using a direct HTTP POST request.
+     * <p>
+     * This method streams the content of the specified {@link File} to the given GCS bucket
+     * and object path. It requires a valid OAuth 2.0 access token for authorization.
+     * The upload is performed as a simple media upload (uploadType=media).
+     * <p>
+     * <strong>Note:</strong> This method performs network operations and file I/O,
+     * so it should be called from a background thread to avoid blocking the UI.
+     * For more robust and feature-rich GCS interactions, consider using the
+     * official Google Cloud Storage client library for Java.
+     *
+     * @param file The {@link File} object representing the local file to upload.
+     * @param bucketName The name of the GCS bucket to upload the file to.
+     * @param objectName The desired name for the object in GCS (e.g., "my-audio.wav").
+     *                   This will be prefixed with "transcripts/" in the GCS path.
+     * @param oauthToken A valid OAuth 2.0 access token with permissions to write to the specified bucket.
+     * @throws java.io.IOException If an error occurs during file reading, network communication,
+     *                             or if the GCS upload fails (e.g., non-2xx HTTP response).
+     *                             The exception message may contain details from the GCS error response.
+     * @see java.net.HttpURLConnection
+     * @see java.io.FileInputStream
+     * @see java.net.URLEncoder
+     */
     private void uploadFileToGCS(File file, String bucketName, String objectName, String oauthToken) throws IOException {
         FileInputStream inputStream = new FileInputStream(file);
         try {

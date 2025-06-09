@@ -59,8 +59,31 @@ public class SignupPage extends AppCompatActivity {
     }
 
 
-
-
+    /**
+     * Attempts to create a new user account using Firebase Authentication and save user details to Firebase Realtime Database.
+     * <p>
+     * This method is typically called when a user clicks a "sign up" button.
+     * It retrieves the email, username, and password from the respective EditText fields.
+     * If any field is empty, a toast message is displayed. Otherwise, a {@link ProgressDialog} is shown
+     * while the user creation process is in progress.
+     * <p>
+     * It calls {@code refAuth.createUserWithEmailAndPassword()} to create the user in Firebase Authentication.
+     * <ul>
+     *     <li>If authentication is successful, it retrieves the new user's UID. A {@link User} object
+     *         is then created with the UID, username, and password (note: storing plain text passwords
+     *         is generally not recommended for production). This {@code User} object is then saved to
+     *         the Firebase Realtime Database under {@code FBRef.refUsers.child(uid)}.</li>
+     *     <li>If saving to the database is successful, a success toast is shown, an {@link Intent}
+     *         with the email and password is prepared as a result for the calling activity,
+     *         and this activity is finished.</li>
+     *     <li>If saving to the database fails, an error toast is shown.</li>
+     *     <li>If Firebase Authentication fails, {@code handleSignupError()} is called to display
+     *         an appropriate error message.</li>
+     * </ul>
+     * The {@link ProgressDialog} is dismissed after the authentication attempt completes.
+     *
+     * @param view The view that triggered this method, typically a Button.
+     */
     public void createUser(View view) {
         String email = etEmail.getText().toString().trim();
         String username = etUsername.getText().toString().trim();
@@ -117,7 +140,15 @@ public class SignupPage extends AppCompatActivity {
     }
 
 
-    // Handles various signup errors
+    /**
+     * Handles various exceptions that can occur during Firebase user signup and displays appropriate toast messages.
+     * <p>
+     * It checks the type of the provided {@link Exception} and shows a specific error message
+     * to the user via a {@link Toast}. This includes errors like invalid email, weak password,
+     * user collision (email already exists), invalid credentials, network issues, or a generic error.
+     *
+     * @param exp The exception caught during the signup process.
+     */
     private void handleSignupError(Exception exp) {
         if (exp instanceof FirebaseAuthInvalidUserException)
             Toast.makeText(context, "Invalid email address", Toast.LENGTH_LONG).show();
@@ -134,8 +165,13 @@ public class SignupPage extends AppCompatActivity {
     }
 
 
-    /*
-        gets you back to the login screen
+    /**
+     * Finishes the current activity, returning the user to the previous screen(login Screen).
+     * <p>
+     * This method is typically used as an onClick handler for a button that allows the user
+     * to navigate back from the current signup page.
+     *
+     * @param view The view that triggered this method, typically a Button.
      */
     public void returnToLoginUser(View view) {
         finish();
@@ -143,7 +179,7 @@ public class SignupPage extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 }

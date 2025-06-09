@@ -53,6 +53,15 @@ public class PlayRecordingActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Initializes and prepares a {@link MediaPlayer} instance to play audio from the given Uri.
+     * <p>
+     * Sets the data source, prepares the media player asynchronously, and sets up listeners
+     * for when preparation is complete (to update UI and enable playback) and when playback
+     * completes (to reset playback state). Handles potential IOExceptions during setup.
+     *
+     * @param audioUri The URI of the audio content to be played.
+     */
     private void initializeMediaPlayer(Uri audioUri) {
         mediaPlayer = new MediaPlayer();
         try {
@@ -73,6 +82,16 @@ public class PlayRecordingActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Toggles the playback state of the {@link MediaPlayer} between play and pause.
+     * <p>
+     * If the media player is initialized and prepared, this method will either pause
+     * playback if it's currently playing, or start/resume playback if it's paused.
+     * It also updates the text of a play/pause button ({@code btnPlayPause}) and
+     * starts a timer update when playback begins.
+     *
+     * @param view The View that triggered this action (e.g., a play/pause button).
+     */
     public void togglePlayPause(View view) {
         if (mediaPlayer == null || !isPrepared) return; // Ensure media is ready
 
@@ -87,6 +106,13 @@ public class PlayRecordingActivity extends AppCompatActivity {
         isPlaying = !isPlaying;
     }
 
+    /**
+     * Starts a recurring task using a {@link Handler} to update the timer display every 500ms.
+     * <p>
+     * This task will continue to run as long as the {@code mediaPlayer} is not null and
+     * {@code isPlaying} is true. Each execution calls {@code updateTimerDisplay()}
+     * and then reschedules itself.
+     */
     private void startUpdatingTimer() {
         handler.postDelayed(new Runnable() {
             @Override
@@ -99,6 +125,13 @@ public class PlayRecordingActivity extends AppCompatActivity {
         }, 500);
     }
 
+    /**
+     * Updates the {@code txtTimer} TextView to display the current playback position and total duration.
+     * <p>
+     * If the {@link MediaPlayer} is prepared, this method retrieves the current position and
+     * total duration (in seconds), formats them using {@code formatTime()}, and sets the
+     * combined string on the {@code txtTimer}.
+     */
     private void updateTimerDisplay() {
         if (mediaPlayer != null && isPrepared) {
             int currentPos = mediaPlayer.getCurrentPosition() / 1000; // Convert to seconds
@@ -107,27 +140,73 @@ public class PlayRecordingActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Formats a given duration in seconds into a "MM:SS" string.
+     *
+     * @param seconds The total number of seconds to format.
+     * @return A string representation of the time in MM:SS format (e.g., "01:30").
+     */
     private String formatTime(int seconds) {
         return String.format(Locale.getDefault(), "%02d:%02d", seconds / 60, seconds % 60);
     }
 
+    /**
+     * Rewinds the media playback by 10 seconds.
+     * <p>
+     * This method is intended to be called from a UI element (e.g., a button)
+     * and delegates to the private {@code rewind(int)} method with a value of 10000 milliseconds.
+     *
+     * @param view The View that triggered this action (e.g., a rewind button).
+     */
     public void rewind10(View view) {
         rewind(10000);
     }
 
+    /**
+     * Rewinds the media playback by 5 seconds.
+     * <p>
+     * This method is intended to be called from a UI element (e.g., a button)
+     * and delegates to the private {@code rewind(int)} method with a value of 5000 milliseconds.
+     *
+     * @param view The View that triggered this action (e.g., a rewind button).
+     */
     public void rewind5(View view) {
         rewind(5000);
     }
 
+    /**
+     * Forwards the media playback by 5 seconds.
+     * <p>
+     * This method is intended to be called from a UI element (e.g., a button)
+     * and delegates to the private {@code forward(int)} method with a value of 5000 milliseconds.
+     *
+     * @param view The View that triggered this action (e.g., a forward button).
+     */
     public void forward5(View view) {
         forward(5000);
     }
 
+    /**
+     * Forwards the media playback by 10 seconds.
+     * <p>
+     * This method is intended to be called from a UI element (e.g., a button)
+     * and delegates to the private {@code forward(int)} method with a value of 10000 milliseconds.
+     *
+     * @param view The View that triggered this action (e.g., a forward button).
+     */
     public void forward10(View view) {
         forward(10000);
     }
 
-
+    /**
+     * Rewinds the media playback by the specified number of milliseconds.
+     * <p>
+     * If the {@link MediaPlayer} instance is not null, it calculates the new playback position
+     * by subtracting the given milliseconds from the current position, ensuring the new position
+     * does not go below zero. It then seeks the MediaPlayer to this new position.
+     *
+     * @param milliseconds The number of milliseconds to rewind the playback.
+     */
     private void rewind(int milliseconds) {
         if (mediaPlayer != null) {
             int newPosition = Math.max(mediaPlayer.getCurrentPosition() - milliseconds, 0);
@@ -135,6 +214,15 @@ public class PlayRecordingActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Forwards the media playback by the specified number of milliseconds.
+     * <p>
+     * If the {@link MediaPlayer} instance is not null, it calculates the new playback position
+     * by adding the given milliseconds to the current position, ensuring the new position
+     * does not exceed the media's total duration. It then seeks the MediaPlayer to this new position.
+     *
+     * @param milliseconds The number of milliseconds to forward the playback.
+     */
     private void forward(int milliseconds) {
         if (mediaPlayer != null) {
             int newPosition = Math.min(mediaPlayer.getCurrentPosition() + milliseconds, mediaPlayer.getDuration());
@@ -142,6 +230,12 @@ public class PlayRecordingActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Called when the activity is being destroyed.
+     * <p>
+     * Releases the {@link MediaPlayer} instance if it exists to free up system resources.
+     * This is crucial to prevent resource leaks.
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
