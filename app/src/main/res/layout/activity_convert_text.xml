@@ -60,7 +60,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="8"
-            android:text="convered text"
+            android:text="converted text"
             android:textColor="#000000"
             android:textSize="30sp" />
 
