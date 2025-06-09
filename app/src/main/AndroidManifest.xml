@@ -24,19 +24,7 @@
             android:name=".PlayRecordingActivity"
             android:exported="false" />
         <activity
-            android:name=".Alpha_StorageImport"
-            android:exported="false" />
-        <activity
-            android:name=".Alpha_BtnRecord"
-            android:exported="false" />
-        <activity
-            android:name=".Alpha_ChooseFile"
-            android:exported="false" />
-        <activity
             android:name=".RecordPage"
-            android:exported="false" />
-        <activity
-            android:name=".RecordsList"
             android:exported="false" />
         <activity
             android:name=".SignupPage"
