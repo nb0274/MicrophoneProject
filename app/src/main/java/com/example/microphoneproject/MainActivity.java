@@ -145,34 +145,4 @@ MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main, menu); // Replace with your menu file name if different
         return true;
     }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//
-//        if (id == R.id.menuLogIn) {
-//            // Already in Log In activity; no need for action here
-//            return true;
-//        } else if (id == R.id.menuSignUp) {
-//            startActivity(new Intent(MainActivity.this, SignupPage.class));
-//            return true;
-//        } else if (id == R.id.menuRecordPage) {
-//            startActivity(new Intent(MainActivity.this, RecordPage.class));
-//            return true;
-//        } else if (id == R.id.menuRecordList) {
-//            startActivity(new Intent(MainActivity.this, RecordsList.class));
-//            return true;
-//        } else if (id == R.id.menuAlphaBtnRecord) {
-//            startActivity(new Intent(MainActivity.this, Alpha_BtnRecord.class));
-//            return true;
-//        } else if (id == R.id.menuAlphaChooseFile) {
-//            startActivity(new Intent(MainActivity.this, Alpha_ChooseFile.class));
-//            return true;
-//        } else if (id == R.id.menuStorageImport) {
-//            startActivity(new Intent(MainActivity.this, Alpha_StorageImport.class));
-//            return true;
-//        } else {
-//            return super.onOptionsItemSelected(item);
-//        }
-//    }
 }

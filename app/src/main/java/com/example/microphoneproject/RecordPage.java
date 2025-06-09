@@ -280,36 +280,6 @@ public class RecordPage extends AppCompatActivity {
         return true;
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//
-//        if (id == R.id.menuLogIn) {
-//            startActivity(new Intent(RecordPage.this, MainActivity.class));
-//            return true;
-//        } else if (id == R.id.menuSignUp) {
-//            startActivity(new Intent(RecordPage.this, SignupPage.class));
-//            return true;
-//        } else if (id == R.id.menuRecordPage) {
-//            // Already in Record Page activity; no need for action here
-//            return true;
-//        } else if (id == R.id.menuRecordList) {
-//            startActivity(new Intent(RecordPage.this, RecordsList.class));
-//            return true;
-//        } else if (id == R.id.menuAlphaBtnRecord) {
-//            startActivity(new Intent(RecordPage.this, Alpha_BtnRecord.class));
-//            return true;
-//        } else if (id == R.id.menuAlphaChooseFile) {
-//            startActivity(new Intent(RecordPage.this, Alpha_ChooseFile.class));
-//            return true;
-//        } else if (id == R.id.menuStorageImport) {
-//            startActivity(new Intent(RecordPage.this, Alpha_StorageImport.class));
-//            return true;
-//        } else {
-//            return super.onOptionsItemSelected(item);
-//        }
-//    }
-
     private void loadUserRecordings() {
         String uid = user.getUID();
         FBRef.refRecordings.child(uid).addValueEventListener(new ValueEventListener() {
