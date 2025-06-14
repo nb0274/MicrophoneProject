@@ -4,9 +4,7 @@ import static com.example.microphoneproject.FBRef.refAuth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -31,7 +29,7 @@ import android.app.Activity;
 import Objects.User;
 
 public class
-MainActivity extends AppCompatActivity {
+LogInPage extends AppCompatActivity {
 
     Intent si;
     EditText etEmail;
@@ -113,18 +111,18 @@ MainActivity extends AppCompatActivity {
                                         user.setUsername(dbTask.getResult().child("username").getValue(String.class));
                                         user.setPassword(password); // Just storing in memory, if needed
 
-                                        Toast.makeText(MainActivity.this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LogInPage.this, "Welcome back, " + user.getUsername(), Toast.LENGTH_SHORT).show();
 
                                         // Go to main app page
-                                        startActivity(new Intent(MainActivity.this, RecordPage.class));
+                                        startActivity(new Intent(LogInPage.this, RecordPage.class));
                                         finish();
                                     } else {
-                                        Toast.makeText(MainActivity.this, "User data not found", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(LogInPage.this, "User data not found", Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
                         } else {
-                            Toast.makeText(MainActivity.this, "Authentication failed. Check email and password.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LogInPage.this, "Authentication failed. Check email and password.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

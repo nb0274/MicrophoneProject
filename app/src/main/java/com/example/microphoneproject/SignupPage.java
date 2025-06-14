@@ -112,7 +112,7 @@ public class SignupPage extends AppCompatActivity {
                                 newUser.setUsername(username);
                                 newUser.setPassword(password);
 
-                                // ✅ Write user data to Firebase Database
+                                // Write user data to Firebase Database
                                 FBRef.refUsers.child(uid).setValue(newUser)
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
